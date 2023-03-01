@@ -7,7 +7,6 @@ import (
 // Cp copy value from src to dst
 func Cp(src, dst interface{}) {
 	if src == nil || dst == nil {
-		log.Warn("src/dst is nil!")
 		return
 	}
 
@@ -18,13 +17,11 @@ func Cp(src, dst interface{}) {
 func cp(src, dst *entity) {
 	// dst must ptr
 	if dst.tpe().Kind() != reflect.Ptr {
-		log.Debug("dst is not a pointer")
 		return
 	}
 
 	// match kind
 	if src.elemTpe().Kind() != dst.elemTpe().Kind() {
-		log.Debug("src, dst kind not match!")
 		return
 	}
 
