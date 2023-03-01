@@ -41,4 +41,5 @@ func cp(src, dst *entity) {
 	}
 
 	// src struct
+	stru(src, dst)
 }
