@@ -18,7 +18,7 @@ func TestSimpleStruct(t *testing.T) {
 
 	as := a{AA: 2, BB: "as"}
 	bs := b{}
-	stru(&entity{o: as}, &entity{o: &bs})
+	setStruct(&entity{o: as}, &entity{o: &bs})
 	if bs.AA != 2 {
 		t.Fatalf("bs AA should 2")
 		return
@@ -46,7 +46,7 @@ func TestObjectStruct(t *testing.T) {
 	now := time.Now()
 	as := a{Slice: []int{1, 2, 3}, Map: map[string]int{"a": 1, "b": 2}, T: now}
 	bs := b{}
-	stru(&entity{o: as}, &entity{o: &bs})
+	setStruct(&entity{o: as}, &entity{o: &bs})
 
 	if len(as.Slice) != len(bs.Slice) {
 		t.Fatalf("bs.Slice len not eq as.Slice")
@@ -88,9 +88,53 @@ func TestStructStruct(t *testing.T) {
 
 	as := a{C: c{X: 1.1}}
 	bs := b{}
-	stru(&entity{o: as}, &entity{o: &bs})
-	if bs.C.X != 1.1 {
-		t.Fatalf("bs c should 1.1")
+	setStruct(&entity{o: as}, &entity{o: &bs})
+	if bs.C.X != as.C.X {
+		t.Fatalf("bs.C.X not eq as.C.X")
+		return
+	}
+
+	type cc struct {
+		X float64
+	}
+
+	type d struct {
+		C c
+	}
+
+	type e struct {
+		C cc
+	}
+
+	ds := d{C: c{X: 1.1}}
+	es := e{}
+	setStruct(&entity{o: ds}, &entity{o: &es})
+	if es.C.X != ds.C.X {
+		t.Fatalf("es.C.X not eq ds.C.X")
+		return
+	}
+
+	type ccc struct {
+		C c
+	}
+
+	type cccc struct {
+		C cc
+	}
+
+	type f struct {
+		CCC ccc
+	}
+
+	type g struct {
+		CCC cccc
+	}
+
+	fs := f{CCC: ccc{C: c{X: 1.1}}}
+	gs := g{}
+	setStruct(&entity{o: fs}, &entity{o: &gs})
+	if gs.CCC.C.X != fs.CCC.C.X {
+		t.Fatalf("gs.CCC.C.X not eq fs.CCC.C.X")
 		return
 	}
 }
@@ -110,7 +154,7 @@ func TestPointerStruct(t *testing.T) {
 
 	as := a{C: &c{X: 1.1}}
 	bs := b{}
-	stru(&entity{o: as}, &entity{o: &bs})
+	setStruct(&entity{o: as}, &entity{o: &bs})
 	if bs.C.X != 1.1 {
 		t.Fatalf("bs c should 1.1")
 		return
