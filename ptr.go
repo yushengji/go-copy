@@ -8,4 +8,6 @@ func ptr(src, dst *entity) {
 		setVal(src, dst)
 		return
 	}
+
+	setStruct(src, dst)
 }
