@@ -12,6 +12,8 @@
 *.out
 
 .idea/
+.fleet/
+.vscode/
 .DS_Store
 **/bin
 **/logs
