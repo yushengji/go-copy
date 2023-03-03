@@ -2,34 +2,48 @@ package gocp
 
 import "reflect"
 
-// setStruct set struct fields
-func setStruct(src, dst *entity) {
-	setStructField(src.elemTpe(), dst.elemTpe(), src.elemVal(), dst.elemVal())
+type structCopier struct{}
+
+func (s structCopier) Check(src *ReflectEntity) bool {
+	// kind dst == src
+	return src.tpe().Kind() == reflect.Struct
 }
 
-// setStructField fill type fields
-func setStructField(srcT, dstT reflect.Type, srcV, dstV reflect.Value) {
+func (s structCopier) Cp(src, dst *ReflectEntity) {
+	dstElemV := dst.elemVal()
+	s.doCp(src.tpe(), dst.elemTpe(), src.val(), dstElemV)
+}
+
+func (s structCopier) Kd() []reflect.Kind {
+	return []reflect.Kind{
+		reflect.Struct,
+	}
+}
+
+// doCp fill type fields
+func (s structCopier) doCp(srcT, dstT reflect.Type, srcV, dstV reflect.Value) {
 	num := srcT.NumField()
 	for i := 0; i < num; i++ {
-		srcField := srcT.Field(i)
-		dstField := dstT.Field(i)
+		srcFieldT := srcT.Field(i)
+		dstFieldT := dstT.Field(i)
 
-		if !srcField.IsExported() || !dstField.IsExported() {
+		if !srcFieldT.IsExported() || !dstFieldT.IsExported() {
 			continue
 		}
 
-		if srcField.Name != dstField.Name {
+		if srcFieldT.Name != dstFieldT.Name {
 			continue
 		}
 
-		if srcField.Type != dstField.Type {
-			if srcField.Type.Kind() == reflect.Struct {
-				setStructField(srcField.Type, dstField.Type, srcV.Field(i), dstV.Field(i))
+		dstFieldV := dstV.Field(i)
+		if srcFieldT.Type != dstFieldT.Type {
+			if srcFieldT.Type.Kind() == reflect.Struct {
+				s.doCp(srcFieldT.Type, dstFieldT.Type, srcV.Field(i), dstFieldV)
 				continue
 			}
 			continue
 		}
 
-		dstV.Field(i).Set(srcV.Field(i))
+		dstFieldV.Set(srcV.Field(i))
 	}
 }
