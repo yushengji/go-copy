@@ -14,6 +14,27 @@ type ReflectEntity struct {
 	once sync.Once
 }
 
+func NewReflectEntityByObj(o interface{}) *ReflectEntity {
+	if o == nil {
+		return nil
+	}
+
+	return &ReflectEntity{
+		o: o,
+	}
+}
+
+func NewReflectEntityByTpeVal(tpe reflect.Type, val reflect.Value) *ReflectEntity {
+	if tpe == nil {
+		return nil
+	}
+
+	return &ReflectEntity{
+		t: tpe,
+		v: val,
+	}
+}
+
 func (e *ReflectEntity) tpe() reflect.Type {
 	if e.t == nil {
 		e.t = reflect.TypeOf(e.o)

@@ -10,8 +10,7 @@ func (s structCopier) Check(src *ReflectEntity) bool {
 }
 
 func (s structCopier) Cp(src, dst *ReflectEntity) {
-	dstElemV := dst.elemVal()
-	s.doCp(src.tpe(), dst.elemTpe(), src.val(), dstElemV)
+	s.doCp(src.tpe(), dst.elemTpe(), src.val(), dst.elemVal())
 }
 
 func (s structCopier) Kd() []reflect.Kind {
