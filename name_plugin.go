@@ -28,7 +28,7 @@ var NamePlugin = &namePlugin{}
 type namePlugin struct{}
 
 func (n namePlugin) Check(src, dst reflect.StructField) bool {
-	return src.Type == dst.Type && dst.Tag.Get("gocp-name") == src.Name
+	return dst.Tag.Get("gocp-name") == src.Name
 }
 
 func (n namePlugin) To(_, _ reflect.StructField, srcV, _ reflect.Value) reflect.Value {

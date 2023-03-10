@@ -39,7 +39,7 @@ var typePlugins = map[reflect.Kind]TypePlugin{
 	reflect.Array:  &arrayCopier{},
 }
 
-var fieldPlugins []FieldPlugin
+var fieldPlugins = make(map[FieldPlugin]struct{})
 
 // RegisterTypePlugin register user type plugins
 func RegisterTypePlugin(tps ...TypePlugin) {
@@ -52,7 +52,9 @@ func RegisterTypePlugin(tps ...TypePlugin) {
 
 // RegisterFieldPlugin register user field plugins
 func RegisterFieldPlugin(tps ...FieldPlugin) {
-	fieldPlugins = append(fieldPlugins, tps...)
+	for i := range tps {
+		fieldPlugins[tps[i]] = struct{}{}
+	}
 }
 
 func init() {

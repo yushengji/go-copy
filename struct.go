@@ -31,27 +31,38 @@ loop:
 			continue
 		}
 
+		set := false
 		dstFieldV := dstV.Field(i)
 		srcFieldV := srcV.Field(i)
-		for _, plugin := range fieldPlugins {
+		resultV := srcFieldV
+		for plugin := range fieldPlugins {
 			if plugin.Check(srcFieldT, dstFieldT) {
-				dstFieldV.Set(plugin.To(srcFieldT, dstFieldT, srcFieldV, dstFieldV))
-				continue loop
+				resultV = plugin.To(srcFieldT, dstFieldT, resultV, dstFieldV)
+				set = true
 			}
 		}
 
-		if srcFieldT.Name != dstFieldT.Name {
-			continue
+		if set {
+			dstFieldV.Set(resultV)
+			continue loop
 		}
 
-		if srcFieldT.Type != dstFieldT.Type {
-			if srcFieldT.Type.Kind() == reflect.Struct {
-				s.doCp(srcFieldT.Type, dstFieldT.Type, srcFieldV, dstFieldV)
-				continue
-			}
-			continue
-		}
-
-		dstFieldV.Set(srcFieldV)
+		s.defCp(srcFieldT, dstFieldT, srcFieldV, dstFieldV)
 	}
+}
+
+func (s structCopier) defCp(srcFieldT, dstFieldT reflect.StructField, srcFieldV, dstFieldV reflect.Value) {
+	if srcFieldT.Name != dstFieldT.Name {
+		return
+	}
+
+	if srcFieldT.Type != dstFieldT.Type {
+		if srcFieldT.Type.Kind() == reflect.Struct {
+			s.doCp(srcFieldT.Type, dstFieldT.Type, srcFieldV, dstFieldV)
+			return
+		}
+		return
+	}
+
+	dstFieldV.Set(srcFieldV)
 }

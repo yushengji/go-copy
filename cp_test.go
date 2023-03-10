@@ -304,28 +304,18 @@ func TestNameFieldPlugin(t *testing.T) {
 		t.Fatalf("aa.A not eq bb.B")
 		return
 	}
-
-	type c struct {
-		C string `gocp-name:"A"`
-	}
-	var cc c
-	Cp(aa, &cc)
-	if aa.A != bb.B {
-		t.Fatalf("aa.A not eq bb.B")
-		return
-	}
 }
 
 func TestDateFieldPlugin(t *testing.T) {
 	type a struct {
-		A time.Time `gocp-name:"B"`
+		A time.Time `gocp-name:"B" gocp:"date"`
 	}
 
 	type b struct {
-		B string `gocp-name:"A"`
+		B string `gocp-name:"A" gocp:"date"`
 	}
 
-	RegisterFieldPlugin(DateStringPlugin)
+	RegisterFieldPlugin(NamePlugin, DateStringPlugin)
 
 	now := time.Now()
 	aa := a{now}
@@ -340,6 +330,36 @@ func TestDateFieldPlugin(t *testing.T) {
 	bb.B = "2023-03-10"
 	Cp(bb, &aa)
 	if bb.B != aa.A.Format("2006-01-02") {
+		t.Fatalf("aa.A not eq bb.B")
+		return
+	}
+
+}
+
+func TestTimeFieldPlugin(t *testing.T) {
+	type a struct {
+		A time.Time `gocp-name:"B" gocp:"time"`
+	}
+
+	type b struct {
+		B string `gocp-name:"A" gocp:"time"`
+	}
+
+	RegisterFieldPlugin(NamePlugin, TimeStringPlugin)
+
+	now := time.Now()
+	aa := a{now}
+	var bb b
+	Cp(aa, &bb)
+	if bb.B != aa.A.Format("2006-01-02 15:04:05") {
+		t.Fatalf("bb.B not eq aa.A")
+		return
+	}
+
+	aa.A = time.Time{}
+	bb.B = "2023-03-10 17:48:00"
+	Cp(bb, &aa)
+	if bb.B != aa.A.Format("2006-01-02 15:04:05") {
 		t.Fatalf("aa.A not eq bb.B")
 		return
 	}
