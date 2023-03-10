@@ -4,31 +4,13 @@ import (
 	"reflect"
 )
 
-// TypePlugin kind value cp
-// assign values for different kinds, like ptr, struct, array, slice val(like uint or int and
-// more simple type). support for custom kind conversions then add plugin to typePlugin or use
-// RegisterTypePlugin.
-type TypePlugin interface {
-	// Check this object support cp
-	Check(src *ReflectEntity) bool
-
-	// Cp copy value
-	Cp(src, dst *ReflectEntity)
-
-	// Kd return this plugin support Kind
-	Kd() []reflect.Kind
-}
-
-var typePlugins = []TypePlugin{
-	&ptrCopier{},
-	&valCopier{},
-	&structCopier{},
-	&arrayCopier{},
-}
-
 // RegisterTypePlugin register user type plugins
-func RegisterTypePlugin(tcs ...TypePlugin) {
-	typePlugins = append(typePlugins, tcs...)
+func RegisterTypePlugin(tps ...TypePlugin) {
+	for _, tp := range tps {
+		for _, kd := range tp.Kd() {
+			typePlugins[kd] = tp
+		}
+	}
 }
 
 // Cp copy value from src to dst
@@ -55,16 +37,9 @@ func Cp(src, dst interface{}) {
 
 func doCp(src, dst *ReflectEntity) {
 	// type plugin Cp
-	for _, c := range typePlugins {
-		for _, kd := range c.Kd() {
-			if src.tpe().Kind() != kd {
-				continue
-			}
-		}
-
-		if c.Check(src) {
-			c.Cp(src, dst)
-			return
-		}
+	plugin, ok := typePlugins[src.tpe().Kind()]
+	if ok && plugin.Check(src) {
+		plugin.Cp(src, dst)
+		return
 	}
 }

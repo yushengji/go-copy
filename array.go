@@ -24,7 +24,7 @@ func (a arrayCopier) Cp(src, dst *ReflectEntity) {
 		d := dst.elemVal().Index(i)
 
 		// cp
-		doCp(&ReflectEntity{o: s.Interface(), t: s.Type(), v: s},
+		doCp(&ReflectEntity{t: s.Type(), v: s},
 			&ReflectEntity{t: d.Addr().Type(), v: d.Addr()})
 	}
 }

@@ -252,3 +252,37 @@ func TestCpArray(t *testing.T) {
 		}
 	}
 }
+
+func TestCpSlice(t *testing.T) {
+	type a struct {
+		A int
+	}
+
+	type b struct {
+		A int
+	}
+
+	as := []a{{1}, {2}, {3}}
+	var bs []b
+	Cp(as, &bs)
+	for i := range as {
+		if as[i].A != bs[i].A {
+			t.Fatalf("as not eq bs")
+			return
+		}
+	}
+
+	type c struct {
+		A int
+		B float64
+	}
+
+	var cs []c
+	Cp(as, &cs)
+	for i := range as {
+		if as[i].A != cs[i].A {
+			t.Fatalf("as not eq cs")
+			return
+		}
+	}
+}

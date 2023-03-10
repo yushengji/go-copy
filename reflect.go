@@ -7,6 +7,7 @@ import (
 
 // ReflectEntity object info
 type ReflectEntity struct {
+	// o if you have t, v it not necessary
 	o    interface{}
 	t    reflect.Type
 	v    reflect.Value

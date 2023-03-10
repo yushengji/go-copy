@@ -11,7 +11,7 @@ func (p ptrCopier) Check(src *ReflectEntity) bool {
 func (p ptrCopier) Cp(src, dst *ReflectEntity) {
 	srcE := src.elem()
 
-	for _, c := range typePlugins[1:] {
+	for _, c := range typePlugins {
 		if c.Check(srcE) {
 			c.Cp(srcE, dst)
 			return
