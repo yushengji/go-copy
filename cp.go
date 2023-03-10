@@ -10,33 +10,27 @@ func Cp(src, dst interface{}) {
 		return
 	}
 
-	cp(&entity{o: src, t: reflect.TypeOf(src)},
-		&entity{o: dst, t: reflect.TypeOf(dst)})
-}
+	srcEntity := &ReflectEntity{o: src, t: reflect.TypeOf(src)}
+	dstEntity := &ReflectEntity{o: dst, t: reflect.TypeOf(dst)}
 
-func cp(src, dst *entity) {
 	// dst must ptr
-	if dst.tpe().Kind() != reflect.Ptr {
+	if dstEntity.tpe().Kind() != reflect.Ptr {
 		return
 	}
 
 	// match kind
-	if src.elemTpe().Kind() != dst.elemTpe().Kind() {
+	if srcEntity.elemTpe().Kind() != dstEntity.elemTpe().Kind() {
 		return
 	}
 
-	// src ptr
-	if src.tpe().Kind() == reflect.Ptr {
-		ptr(src, dst)
+	doCp(srcEntity, dstEntity)
+}
+
+func doCp(src, dst *ReflectEntity) {
+	// type plugin Cp
+	plugin, ok := typePlugins[src.tpe().Kind()]
+	if ok && plugin.Check(src) {
+		plugin.Cp(src, dst)
 		return
 	}
-
-	// src basic
-	if allValType(src.elemTpe().Kind(), dst.elemTpe().Kind()) {
-		setVal(src, dst)
-		return
-	}
-
-	// src struct
-	setStruct(src, dst)
 }

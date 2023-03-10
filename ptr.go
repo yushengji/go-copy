@@ -1,13 +1,24 @@
 package gocp
 
-func ptr(src, dst *entity) {
-	srcElem := src.tpe().Elem()
-	dstElem := dst.tpe().Elem()
+import "reflect"
 
-	if allValType(srcElem.Kind()) && allValType(dstElem.Kind()) {
-		setVal(src, dst)
-		return
+type ptrCopier struct{}
+
+func (p ptrCopier) Check(src *ReflectEntity) bool {
+	return src.tpe().Kind() == reflect.Ptr
+}
+
+func (p ptrCopier) Cp(src, dst *ReflectEntity) {
+	srcE := src.elem()
+
+	for _, c := range typePlugins {
+		if c.Check(srcE) {
+			c.Cp(srcE, dst)
+			return
+		}
 	}
+}
 
-	setStruct(src, dst)
+func (p ptrCopier) Kd() []reflect.Kind {
+	return []reflect.Kind{reflect.Ptr}
 }
