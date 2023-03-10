@@ -9,7 +9,8 @@ func (v valCopier) Check(src *ReflectEntity) bool {
 	return k == reflect.Int || k == reflect.Int8 || k == reflect.Int16 || k == reflect.Int32 ||
 		k == reflect.Int64 || k == reflect.Uint || k == reflect.Uint8 || k == reflect.Uint16 ||
 		k == reflect.Uint32 || k == reflect.Uint64 || k == reflect.Float64 || k == reflect.Float32 ||
-		k == reflect.Bool || k == reflect.Complex64 || k == reflect.Complex128 || k == reflect.String
+		k == reflect.Bool || k == reflect.Complex64 || k == reflect.Complex128 || k == reflect.String ||
+		k == reflect.Map
 }
 
 func (v valCopier) Cp(src, dst *ReflectEntity) {
@@ -38,5 +39,6 @@ func (v valCopier) Kd() []reflect.Kind {
 		reflect.Complex64,
 		reflect.Complex128,
 		reflect.String,
+		reflect.Map,
 	}
 }

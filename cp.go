@@ -4,15 +4,6 @@ import (
 	"reflect"
 )
 
-// RegisterTypePlugin register user type plugins
-func RegisterTypePlugin(tps ...TypePlugin) {
-	for _, tp := range tps {
-		for _, kd := range tp.Kd() {
-			typePlugins[kd] = tp
-		}
-	}
-}
-
 // Cp copy value from src to dst
 func Cp(src, dst interface{}) {
 	if src == nil || dst == nil {

@@ -286,3 +286,62 @@ func TestCpSlice(t *testing.T) {
 		}
 	}
 }
+
+func TestNameFieldPlugin(t *testing.T) {
+	type a struct {
+		A int
+	}
+
+	type b struct {
+		B int `gocp-name:"A"`
+	}
+
+	RegisterFieldPlugin(NamePlugin)
+	aa := a{1}
+	var bb b
+	Cp(aa, &bb)
+	if aa.A != bb.B {
+		t.Fatalf("aa.A not eq bb.B")
+		return
+	}
+
+	type c struct {
+		C string `gocp-name:"A"`
+	}
+	var cc c
+	Cp(aa, &cc)
+	if aa.A != bb.B {
+		t.Fatalf("aa.A not eq bb.B")
+		return
+	}
+}
+
+func TestDateFieldPlugin(t *testing.T) {
+	type a struct {
+		A time.Time `gocp-name:"B"`
+	}
+
+	type b struct {
+		B string `gocp-name:"A"`
+	}
+
+	RegisterFieldPlugin(DateStringPlugin)
+
+	now := time.Now()
+	aa := a{now}
+	var bb b
+	Cp(aa, &bb)
+	if bb.B != aa.A.Format("2006-01-02") {
+		t.Fatalf("bb.B not eq aa.A")
+		return
+	}
+
+	aa.A = time.Time{}
+	bb.B = "2023-03-10"
+	Cp(bb, &aa)
+	if bb.B != aa.A.Format("2006-01-02") {
+		t.Fatalf("aa.A not eq bb.B")
+		return
+	}
+
+}
