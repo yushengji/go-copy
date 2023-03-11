@@ -104,4 +104,4 @@ When mapping between time and string is required, date/time can be selected
 for mapping according to actual scenarios.
 
 ## LICENSE
-The go-copy is released under version 2.0 of the Apache License.
+The go-copy is released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
