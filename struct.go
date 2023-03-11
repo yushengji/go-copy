@@ -56,6 +56,10 @@ func (s structCopier) defCp(srcFieldT, dstFieldT reflect.StructField, srcFieldV,
 		return
 	}
 
+	if srcFieldT.Type.Kind() != dstFieldT.Type.Kind() {
+		return
+	}
+
 	if srcFieldT.Type != dstFieldT.Type {
 		if srcFieldT.Type.Kind() == reflect.Struct {
 			s.doCp(srcFieldT.Type, dstFieldT.Type, srcFieldV, dstFieldV)

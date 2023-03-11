@@ -363,5 +363,4 @@ func TestTimeFieldPlugin(t *testing.T) {
 		t.Fatalf("aa.A not eq bb.B")
 		return
 	}
-
 }
