@@ -1,6 +1,8 @@
 package gocp
 
-import "reflect"
+import (
+	"reflect"
+)
 
 // NamePlugin Suitable for different name struct field value copy.
 // For example, we have struct A:
@@ -27,10 +29,22 @@ var NamePlugin = &namePlugin{}
 
 type namePlugin struct{}
 
-func (n namePlugin) Check(src, dst reflect.StructField) bool {
-	return dst.Tag.Get("gocp-name") == src.Name
+func (n namePlugin) Check(dstF reflect.StructField) bool {
+	return dstF.Tag.Get("gocp-name") != ""
 }
 
-func (n namePlugin) To(_, _ reflect.StructField, srcV, _ reflect.Value) reflect.Value {
+func (n namePlugin) Match(src reflect.Type, dstF reflect.StructField) (reflect.StructField, bool) {
+	return src.FieldByName(dstF.Tag.Get("gocp-name"))
+}
+
+func (n namePlugin) Verify(srcF, dstF reflect.StructField) bool {
+	return srcF.Type == dstF.Type
+}
+
+func (n namePlugin) Transform(srcV, _ reflect.Value) reflect.Value {
 	return srcV
+}
+
+func (n namePlugin) Order() int {
+	return 1
 }

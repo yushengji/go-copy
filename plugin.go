@@ -1,6 +1,9 @@
 package gocp
 
-import "reflect"
+import (
+	"reflect"
+	"sort"
+)
 
 // TypePlugin value cp for different kind
 // assign values for different kinds, like ptr, struct, array, slice val(like uint or int and
@@ -25,11 +28,25 @@ type TypePlugin interface {
 // It should be noted that the use of built-in plugins requires registration.
 // Once registered, the plugin-processed values are preferred when copying struct properties.
 type FieldPlugin interface {
-	// Check field should use this plugin.
-	Check(src, dst reflect.StructField) bool
+	// Check if the target struct field can be processed.
+	// Field can be processed, return true, can't return false.
+	Check(dstF reflect.StructField) bool
 
-	// To convert src value to new value to set.
-	To(srcT, dstT reflect.StructField, srcV, dstV reflect.Value) reflect.Value
+	// Match source struct field against target struct field.
+	// If match success, return the field and true.
+	// On the contrary, return zero value and false.
+	Match(srcT reflect.Type, dstF reflect.StructField) (reflect.StructField, bool)
+
+	// Verify that the source struct fields match the target struct fields.
+	Verify(srcF, dstF reflect.StructField) bool
+
+	// Transform the source value by the target value.
+	// Return transformed value.
+	Transform(srcV, dstV reflect.Value) reflect.Value
+
+	// Order is plugin order, the smaller the front.
+	// Order will matter when processing struct fields.
+	Order() int
 }
 
 var typePlugins = map[reflect.Kind]TypePlugin{
@@ -39,7 +56,7 @@ var typePlugins = map[reflect.Kind]TypePlugin{
 	reflect.Array:  &arrayCopier{},
 }
 
-var fieldPlugins = make(map[FieldPlugin]struct{})
+var fieldPlugins []FieldPlugin
 
 // RegisterTypePlugin register user type plugins
 func RegisterTypePlugin(tps ...TypePlugin) {
@@ -52,9 +69,20 @@ func RegisterTypePlugin(tps ...TypePlugin) {
 
 // RegisterFieldPlugin register user field plugins
 func RegisterFieldPlugin(tps ...FieldPlugin) {
-	for i := range tps {
-		fieldPlugins[tps[i]] = struct{}{}
+loop:
+	for _, tp := range tps {
+		for _, exist := range fieldPlugins {
+			if exist == tp {
+				continue loop
+			}
+		}
+
+		fieldPlugins = append(fieldPlugins, tp)
 	}
+
+	sort.Slice(fieldPlugins, func(i, j int) bool {
+		return fieldPlugins[i].Order() > fieldPlugins[j].Order()
+	})
 }
 
 func init() {

@@ -21,34 +21,68 @@ func (s structCopier) Kd() []reflect.Kind {
 
 // doCp fill type fields
 func (s structCopier) doCp(srcT, dstT reflect.Type, srcV, dstV reflect.Value) {
-	num := srcT.NumField()
-loop:
-	for i := 0; i < num; i++ {
-		srcFieldT := srcT.Field(i)
-		dstFieldT := dstT.Field(i)
+	num := dstT.NumField()
+	srcFieldNum := srcT.NumField()
+	srcFields := make([]reflect.StructField, 0, srcFieldNum)
+	for i := 0; i < srcFieldNum; i++ {
+		srcFields = append(srcFields, srcT.Field(i))
+	}
 
-		if !srcFieldT.IsExported() || !dstFieldT.IsExported() {
+	for i := 0; i < num; i++ {
+		dstF := dstT.Field(i)
+		if !dstF.IsExported() {
 			continue
 		}
 
-		set := false
-		dstFieldV := dstV.Field(i)
-		srcFieldV := srcV.Field(i)
-		resultV := srcFieldV
-		for plugin := range fieldPlugins {
-			if plugin.Check(srcFieldT, dstFieldT) {
-				resultV = plugin.To(srcFieldT, dstFieldT, resultV, dstFieldV)
-				set = true
-			}
+		dstFV := dstV.Field(i)
+		if s.tryPlugin(srcT, dstF, srcV, dstFV) {
+			continue
 		}
 
-		if set {
-			dstFieldV.Set(resultV)
-			continue loop
+		srcF, ok := srcT.FieldByName(dstF.Name)
+		if !ok {
+			continue
 		}
 
-		s.defCp(srcFieldT, dstFieldT, srcFieldV, dstFieldV)
+		s.defCp(srcF, dstF, srcV.FieldByName(dstF.Name), dstFV)
 	}
+}
+
+func (s structCopier) tryPlugin(srcT reflect.Type, dstF reflect.StructField, srcV, dstFV reflect.Value) bool {
+	set := false
+	var srcF reflect.StructField
+	for _, plugin := range fieldPlugins {
+		if !plugin.Check(dstF) {
+			continue
+		}
+
+		matched, ok := plugin.Match(srcT, dstF)
+		if !ok {
+			continue
+		}
+
+		if !matched.IsExported() {
+			continue
+		}
+
+		srcF = matched
+	}
+
+	resultV := srcV.FieldByName(srcF.Name)
+	for _, otherPlugin := range fieldPlugins {
+		if !otherPlugin.Check(dstF) || !otherPlugin.Verify(srcF, dstF) {
+			continue
+		}
+
+		set = true
+		resultV = otherPlugin.Transform(resultV, dstFV)
+	}
+
+	if set {
+		dstFV.Set(resultV)
+	}
+
+	return set
 }
 
 func (s structCopier) defCp(srcFieldT, dstFieldT reflect.StructField, srcFieldV, dstFieldV reflect.Value) {
