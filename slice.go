@@ -11,7 +11,10 @@ func (s sliceCopier) Check(src *ReflectEntity) bool {
 }
 
 func (s sliceCopier) Cp(src, dst *ReflectEntity) {
-	s.doCp(dst.elemTpe().Elem(), src.elemVal(), dst.val().Elem())
+	dstT := dst.elemTpe().Elem()
+	srcV := src.elemVal()
+	dstV := dst.elemVal()
+	s.doCp(dstT, srcV, dstV)
 }
 
 func (s sliceCopier) Kd() []reflect.Kind {

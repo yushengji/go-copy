@@ -1,6 +1,8 @@
 package gocp
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type structCopier struct{}
 
@@ -90,13 +92,25 @@ func (s structCopier) defCp(srcFieldT, dstFieldT reflect.StructField, srcFieldV,
 		return
 	}
 
-	if srcFieldT.Type.Kind() != dstFieldT.Type.Kind() {
+	fieldKd := srcFieldT.Type.Kind()
+	if fieldKd != dstFieldT.Type.Kind() {
 		return
 	}
 
 	if srcFieldT.Type != dstFieldT.Type {
-		if srcFieldT.Type.Kind() == reflect.Struct {
+		if fieldKd == reflect.Struct {
 			s.doCp(srcFieldT.Type, dstFieldT.Type, srcFieldV, dstFieldV)
+			return
+		}
+
+		if fieldKd == reflect.Array || fieldKd == reflect.Slice {
+			doCp(&ReflectEntity{
+				t: srcFieldT.Type,
+				v: srcFieldV,
+			}, &ReflectEntity{
+				t: dstFieldT.Type,
+				v: dstFieldV,
+			})
 			return
 		}
 		return

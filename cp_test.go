@@ -364,3 +364,36 @@ func TestTimeFieldPlugin(t *testing.T) {
 		return
 	}
 }
+
+func TestStructArray(t *testing.T) {
+	type AA struct {
+		A int
+	}
+
+	type BB struct {
+		A int
+	}
+
+	type A struct {
+		As []AA
+	}
+
+	type B struct {
+		As []BB
+	}
+
+	aa := A{As: []AA{{1}, {2}}}
+	var bb B
+	Cp(aa, &bb)
+	if len(aa.As) != len(bb.As) {
+		t.Fatalf("aa.len not eq bb.len")
+		return
+	}
+
+	for i := range bb.As {
+		if aa.As[i].A != bb.As[i].A {
+			t.Fatalf("aa not eq bb")
+			return
+		}
+	}
+}
