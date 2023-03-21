@@ -12,6 +12,11 @@ func (s structCopier) Check(src *ReflectEntity) bool {
 }
 
 func (s structCopier) Cp(src, dst *ReflectEntity) {
+	// set ** struct type
+	if dst.isNil() {
+		dst.setPtrVal(reflect.New(dst.elemTpe()))
+	}
+
 	s.doCp(src.tpe(), dst.elemTpe(), src.val(), dst.elemVal())
 }
 

@@ -397,3 +397,21 @@ func TestStructArray(t *testing.T) {
 		}
 	}
 }
+
+func TestMultilevelPointer(t *testing.T) {
+	type A struct {
+		A int
+	}
+
+	type B struct {
+		A int
+	}
+
+	aa := &A{A: 1}
+	var bb *B
+	Cp(&aa, &bb)
+	if aa.A != bb.A {
+		t.Fatalf("aa.A not eq bb.A")
+		return
+	}
+}

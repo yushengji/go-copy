@@ -54,19 +54,11 @@ func (e *ReflectEntity) val() reflect.Value {
 }
 
 func (e *ReflectEntity) elemTpe() reflect.Type {
-	v := e.tpe()
-	if v.Kind() == reflect.Ptr {
-		return v.Elem()
-	}
-	return v
+	return finallyElemTpe(e.tpe())
 }
 
 func (e *ReflectEntity) elemVal() reflect.Value {
-	v := e.val()
-	if v.Kind() == reflect.Ptr {
-		return v.Elem()
-	}
-	return v
+	return finallyElemVal(e.val())
 }
 
 func (e *ReflectEntity) elem() *ReflectEntity {
@@ -75,4 +67,54 @@ func (e *ReflectEntity) elem() *ReflectEntity {
 		t: e.elemTpe(),
 		v: e.elemVal(),
 	}
+}
+
+func (e *ReflectEntity) isNil() bool {
+	return isNil(e.val())
+}
+
+func (e *ReflectEntity) setPtrVal(val reflect.Value) {
+	setPtrVal(e.val(), val)
+}
+
+func setPtrVal(dst reflect.Value, val reflect.Value) {
+	if dst.Kind() == reflect.Ptr && dst.Elem().Kind() == reflect.Ptr {
+		setPtrVal(dst.Elem(), val)
+		return
+	}
+	dst.Set(val)
+}
+
+func isNil(val reflect.Value) bool {
+	if val.Kind() == reflect.Ptr {
+		if val.Elem().Kind() == reflect.Ptr {
+			return isNil(val.Elem())
+		}
+		return val.IsNil()
+	}
+	return false
+}
+
+func finallyElemTpe(tpe reflect.Type) reflect.Type {
+	if tpe.Kind() == reflect.Ptr {
+		if tpe.Elem().Kind() == reflect.Ptr {
+			return finallyElemTpe(tpe.Elem())
+		}
+
+		return tpe.Elem()
+	}
+
+	return tpe
+}
+
+func finallyElemVal(val reflect.Value) reflect.Value {
+	if val.Kind() == reflect.Ptr {
+		if val.Elem().Kind() == reflect.Ptr {
+			return finallyElemVal(val.Elem())
+		}
+
+		return val.Elem()
+	}
+
+	return val
 }
