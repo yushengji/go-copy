@@ -37,11 +37,19 @@ func (d dateStringPlugin) Match(srcT reflect.Type, dstF reflect.StructField) (re
 
 func (d dateStringPlugin) Verify(srcF, dstF reflect.StructField) bool {
 	sT := srcF.Type
+	if sT == nil {
+		return false
+	}
+
 	if srcF.Type.Kind() == reflect.Ptr {
 		sT = srcF.Type.Elem()
 	}
 
 	dT := dstF.Type
+	if dT == nil {
+		return false
+	}
+
 	if dstF.Type.Kind() == reflect.Ptr {
 		dT = dstF.Type.Elem()
 	}
